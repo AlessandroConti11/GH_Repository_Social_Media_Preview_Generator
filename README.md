@@ -6,7 +6,7 @@ Author: Alessandro Conti - [AlessandroConti11](https://github.com/AlessandroCont
 License: [MIT license](LICENSE).
 
 
-Tags: `#CSS`, `#GH`, `#GitHub`, `GitHub_repository`, `#HTML`, `#image`, `#image_generator`, `#repository`, `repository_social_media_preview`, `repository_social_preview`, `#social_media_preview`, `#social_media_preview_generator`, `#social_preview`, `#social_preview_generator`, `#javascript`, `#JS`.
+Tags: `#CSS`, `#GH`, `#GitHub`, `GitHub_repository`, `#HTML`, `#image`, `#image_generator`, `#repository`, `#repository_social_media_preview`, `#repository_social_preview`, `#social_media_preview`, `#social_media_preview_generator`, `#social_preview`, `#social_preview_generator`, `#javascript`, `#JS`.
 
 
 ## Specification
