@@ -1,11 +1,71 @@
-const repoUrl = document.getElementById("repo-input")
+const
+    /**
+     * The input where to insert the repository URL.
+     * @type {HTMLElement}
+     */
+    repository_url_input = document.getElementById("repo-input"),
+    /**
+     * The download button.
+     * @type {HTMLElement}
+     */
+    download_button = document.getElementById("download-btn"),
+    /**
+     * The select where to select the background color.
+     * @type {HTMLElement}
+     */
+    background_color_select = document.getElementById("background-color"),
+    /**
+     * The select where to select the username color.
+     * @type {HTMLElement}
+     */
+    username_color_select = document.getElementById("username-color"),
+    /**
+     * The select where to select the repository color.
+     * @type {HTMLElement}
+     */
+    repository_color_select = document.getElementById("repository-color"),
+    /**
+     * The select where to select the description color.
+     * @type {HTMLElement}
+     */
+    description_color_select = document.getElementById("description-color"),
+    /**
+     * The select where to select the signature color.
+     * @type {HTMLElement}
+     */
+    signature_color_select = document.getElementById("signature-color"),
+    /**
+     * The color option container.
+     * @type {HTMLElement}
+     */
+    color_options_container = document.getElementById("color-options");
 
 
-repoUrl.addEventListener("keypress", function(event) {
+/**
+ * Add Enter event to the input.
+ */
+repository_url_input.addEventListener("keypress", function(event) {
   if (event.key === "Enter") {
-    generatePreview();
+    generate_preview();
   }
 });
+
+
+window.addEventListener("load", function() {
+  default_color_options();
+})
+
+
+/**
+ * Function that sets the default color options.
+ */
+function default_color_options() {
+  background_color_select.value = '#282C34';
+  username_color_select.value = '#C778DD';
+  repository_color_select.value = '#98C379';
+  description_color_select.value = '#FFFFFF';
+  signature_color_select.value = '#969696';
+}
 
 
 /**
@@ -13,7 +73,7 @@ repoUrl.addEventListener("keypress", function(event) {
  *
  * @returns {Promise<void>} does not return anything but creates a preview for the repository.
  */
-async function generatePreview() {
+async function generate_preview() {
   //Wait until the 'Tektur' font is loaded
   await document.fonts.load("10px 'Tektur'")
 
@@ -23,7 +83,7 @@ async function generatePreview() {
      * Validate the input URL and extract the owner and repo names.
      * @type {RegExpMatchArray}
      */
-    match = repoUrl.value.trim().match(/github\.com\/(.+)\/(.+)/);
+    match = repository_url_input.value.trim().match(/github\.com\/(.+)\/(.+)/);
 
   if (!match) {
     alert("Please enter a valid GitHub repository URL.");
@@ -93,7 +153,17 @@ async function generatePreview() {
 
 
   //Generate preview
-  createPreview(username, repository_name, description, avatar_image_objectURL);
+  create_preview(username, repository_name, description, avatar_image_objectURL);
+
+
+  //Hide the color options container
+  if (color_options_container.classList.contains("expanded")){
+    toggle_color_options();
+  }
+
+
+  //Set the default color options
+  default_color_options();
 }
 
 
@@ -108,113 +178,255 @@ function font(font_size) {
 }
 
 
+/**
+ * Function that generates a preview image for a GitHub repository.
+ * The preview includes the username, repository name, description, and profile image.
+ *
+ * @param username the GitHub username.
+ * @param repository_name the GitHub repository name.
+ * @param description the GitHub description.
+ * @param profile_image_url the URL of GitHub profile image.
+ */
+function create_preview(username, repository_name, description, profile_image_url) {
+  const
+      /**
+       * The canvas element.
+       * @type {HTMLCanvasElement}
+       */
+      canvas = document.createElement('canvas'),
+      /**
+       * The drawing context of the canvas element.
+       * @type {CanvasRenderingContext2D}
+       */
+      canvas_context = canvas.getContext('2d'),
+      /**
+       * The width of the image.
+       * @type {number}
+       */
+      width = 1280,
+      /**
+       * The height of the image.
+       * @type {number}
+       */
+      height = 640,
+      /**
+       * The horizontal padding.
+       * @type {number}
+       */
+      padding_x = 50,
+      /**
+       * The vertical padding.
+       * @type {number}
+       */
+      padding_y = 150,
+      /**
+       * The background color.
+       * @type {string}
+       */
+      // background_color = '#282C34',
+      background_color = background_color_select.value,
+      /**
+       * The description color.
+       * @type {string}
+       */
+      // description_color = '#FFFFFF',
+      description_color = description_color_select.value,
+      /**
+       * The username color.
+       * @type {string}
+       */
+      // username_color = '#C778DD',
+      username_color = username_color_select.value,
+      /**
+       * The repository color.
+       * @type {string}
+       */
+      // repository_color = '#98C379',
+      repository_color = repository_color_select.value,
+      /**
+       * The signature color.
+       * @type {string}
+       */
+      // signature_color = '#969696',
+      signature_color = signature_color_select.value,
+      /**
+       * The title (Username / Repository) font size.
+       * @type {number}
+       */
+      title_font_size = 60,
+      /**
+       * The description font size.
+       * @type {number}
+       */
+      description_font_size = 40,
+      /**
+       * The signature font size.
+       * @type {number}
+       */
+      signature_font_size = 35;
 
-function createPreview(username, repoName, description, profileImgUrl) {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
 
-  const width = 1280, height = 640;
+  //Set width and height of the image
   canvas.width = width;
   canvas.height = height;
 
-  const paddingX = 50;
-  const xStart = paddingX, yStart = 100;
-  const backgroundColor = '#282C34';
-  const textColor = '#FFFFFF';
-  const highlightUser = '#C778DD';
-  const highlightRepo = '#98C379';
-  const fontTitleSize = 60;
-  const fontDescSize = 40;
-  const fontUsernameSize = 35;
+  //Draw background
+  canvas_context.fillStyle = background_color;
+  canvas_context.fillRect(0, 0, width, height);
 
-  // Draw background
-  ctx.fillStyle = backgroundColor;
-  ctx.fillRect(0, 0, width, height);
 
-  // Adjust and Draw text (username / repo)
-  let fontSize = fontTitleSize;
+  //Draw Username / Repository
+  let
+      /**
+       * Temporary font size.
+       * @type {number}
+       */
+      temporary_font_size = title_font_size;
+
   while (true) {
-    ctx.font = font(fontSize);
-    const totalWidth = ctx.measureText(username).width + ctx.measureText(" / ").width + ctx.measureText(repoName).width;
+    canvas_context.font = font(temporary_font_size);
+    const
+        /**
+         * Total width of title.
+         * @type {number}
+         */
+        title_total_width = canvas_context.measureText(username).width + canvas_context.measureText(" / ").width + canvas_context.measureText(repository_name).width;
 
-    if (totalWidth <= width - 2 * paddingX) {
+    if (title_total_width <= width - 2 * padding_x) {
       break;
     }
-    fontSize -= 1;
+    temporary_font_size -= 1;
   }
 
-  // Draw username / repo name centered
-  const userRepoX = (width - ctx.measureText(username).width - ctx.measureText(" / ").width - ctx.measureText(repoName).width) / 2;
-  ctx.fillStyle = highlightUser;
-  ctx.fillText(username, userRepoX, yStart);
+  const
+      /**
+       * The x-axis coordinate of the point at which to begin drawing the title, in pixels.
+       * @type {number}
+       */
+      title_x = (width - canvas_context.measureText(username).width - canvas_context.measureText(" / ").width - canvas_context.measureText(repository_name).width) / 2;
 
-  ctx.fillStyle = '#FFFFFF';
-  ctx.fillText(" / ", userRepoX + ctx.measureText(username).width, yStart);
+  //Username
+  canvas_context.fillStyle = username_color;
+  canvas_context.fillText(username, title_x, padding_y);
 
-  ctx.fillStyle = highlightRepo;
-  ctx.fillText(repoName, userRepoX + ctx.measureText(username).width + ctx.measureText(" / ").width, yStart);
+  //.../
+  canvas_context.fillStyle = description_color;
+  canvas_context.fillText(" / ", title_x + canvas_context.measureText(username).width, padding_y);
 
-  // Space available for description (avoid overlapping with signature and profile image)
-  const maxDescHeight = height - (yStart + fontSize + 20) - 130; // Leaves space for signature and profile image
+  //...Repository
+  canvas_context.fillStyle = repository_color;
+  canvas_context.fillText(repository_name, title_x + canvas_context.measureText(username).width + canvas_context.measureText(" / ").width, padding_y);
 
-  let descFontSize = fontDescSize;
-  let wrappedDescription = [];
 
-  while (descFontSize > 10) { // Prevent font from becoming too small
-    ctx.font = font(descFontSize);
-    ctx.fillStyle = textColor;
-    wrappedDescription = wrapText(ctx, description, descFontSize, width - 2 * paddingX);
+  //Draw description
+  const
+      /**
+       * Maximum description height.
+       * @type {number}
+       */
+      maximum_description_height = height - (padding_y + temporary_font_size + 20) - 130; // Leaves space for signature and profile image
 
-    let totalHeight = wrappedDescription.length * (descFontSize + 10);
-    if (totalHeight <= maxDescHeight) {
+  let
+      /**
+       * List of multiple lines based on a given maximum width.
+       * @type {*[]}
+       */
+      description_lines = [];
+
+  temporary_font_size = description_font_size;
+  while (temporary_font_size > 10) {
+    canvas_context.font = font(temporary_font_size);
+    canvas_context.fillStyle = description_color;
+    description_lines = wrap_text(canvas_context, description, temporary_font_size, width - 2 * padding_x);
+
+    let
+        /**
+         * Total description height.
+         * @type {number}
+         */
+        total_description_height = description_lines.length * (temporary_font_size + 10);
+
+    if (total_description_height <= maximum_description_height) {
       break;
     }
-    descFontSize -= 1;
+    temporary_font_size -= 1;
   }
 
-  let descY = yStart + fontSize + 25;
+  let
+      /**
+       * The y-axis coordinate of the baseline on which to begin drawing the description, in pixels.
+       * @type {number}
+       */
+      description_y = padding_y + temporary_font_size + 25;
 
-  wrappedDescription.forEach(line => {
-    const textWidth = ctx.measureText(line).width;
-    ctx.fillText(line, (width - textWidth) / 2, descY);
-    descY += descFontSize + 10;
+  description_lines.forEach(line => {
+    canvas_context.fillText(line, (width - canvas_context.measureText(line).width) / 2, description_y);
+    description_y += temporary_font_size + 10;
   });
 
-  // Draw profile image (circular)
-  const profileImg = new Image();
-  profileImg.onload = () => {
-    ctx.save();
-    const radius = 25;
-    ctx.beginPath();
-    ctx.arc(50 + radius, height - 100 - radius, radius, 0, 2 * Math.PI);
-    ctx.clip();
-    ctx.drawImage(profileImg, 50, height - 100 - 50, 50, 50);
-    ctx.restore();
 
-    // Draw username signature
-    ctx.fillStyle = 'rgba(150, 150, 150, 1)';
-    ctx.font = font(fontUsernameSize);
-    ctx.fillText(username, width - ctx.measureText(username).width - paddingX, height - 130);
+  //Draw profile image
+  const
+      /**
+       * The profile image.
+       * @type {HTMLImageElement}
+       */
+      profile_image = new Image();
 
-    // Show generated preview
-    const dataUrl = canvas.toDataURL("image/png");
-    document.getElementById("generated-image").src = dataUrl;
+  profile_image.onload = () => {
+    canvas_context.save();
+    const
+        /**
+         * The radius of profile image
+         * @type {number}
+         */
+        radius = 25;
+
+    canvas_context.beginPath();
+    canvas_context.arc(50 + radius, height - 100 - radius, radius, 0, 2 * Math.PI);
+    canvas_context.clip();
+    canvas_context.drawImage(profile_image, 50, height - 100 - 50, 50, 50);
+    canvas_context.restore();
+
+
+    //Draw signature
+    canvas_context.fillStyle = signature_color;
+    canvas_context.font = font(signature_font_size);
+    canvas_context.fillText(username, width - canvas_context.measureText(username).width - padding_x, height - 130);
+
+
+    //Show generated preview
+    const
+        /**
+         * The generated preview.
+         * @type {string}
+         */
+        generated_preview_url = canvas.toDataURL("image/png");
+
+    document.getElementById("generated-image").src = generated_preview_url;
     document.getElementById("generated-image").style.display = 'block';
 
-    // Show download button
-    const downloadBtn = document.getElementById("download-btn");
-    downloadBtn.style.display = 'block';
 
-    // Handle download
-    downloadBtn.onclick = () => {
-      const link = document.createElement('a');
-      link.href = dataUrl;
-      link.download = `${username}_${repoName}_preview.png`;
+    //Show download button
+    download_button.style.display = 'block';
+
+
+    //Handle download
+    download_button.onclick = () => {
+      const
+          /**
+           * The image preview download link.
+           * @type {HTMLAnchorElement}
+           */
+          link = document.createElement('a');
+      link.href = generated_preview_url;
+      link.download = `${username}_${repository_name}_preview.png`;
       link.click();
     };
 
   };
-  profileImg.src = profileImgUrl;
+
+  profile_image.src = profile_image_url;
 }
 
 
@@ -227,7 +439,7 @@ function createPreview(username, repoName, description, profileImgUrl) {
  * @param max_width the maximum width allowed per line before wrapping.
  * @returns {*[]} an array of strings where each element is a line of wrapped text.
  */
-function wrapText(ctx, text, font_size, max_width) {
+function wrap_text(ctx, text, font_size, max_width) {
   const
     /**
      * Array to store the wrapped lines.
@@ -319,4 +531,12 @@ function wrapText(ctx, text, font_size, max_width) {
   }
 
   return lines;
+}
+
+
+/**
+ * Function that shows or hides the color options.
+ */
+function toggle_color_options() {
+  color_options_container.classList.toggle("expanded");
 }
