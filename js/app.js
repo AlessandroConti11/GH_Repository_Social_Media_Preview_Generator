@@ -52,6 +52,7 @@ repository_url_input.addEventListener("keypress", function(event) {
 
 
 window.addEventListener("load", function() {
+  download_button.style.display = "none";
   default_color_options();
 })
 
